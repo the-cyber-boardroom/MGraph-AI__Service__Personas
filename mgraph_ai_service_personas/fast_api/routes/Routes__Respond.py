@@ -7,9 +7,9 @@ from mgraph_ai_service_personas.service.personas.Persona__Service   import Perso
 
 
 TAG__ROUTES_RESPOND     = 'respond'
-ROUTES_PATHS__RESPOND   = [f'/{TAG__ROUTES_RESPOND}',
-                            f'/{TAG__ROUTES_RESPOND}/generate-persona',
-                            f'/{TAG__ROUTES_RESPOND}/conversation']
+ROUTES_PATHS__RESPOND   = [f'/{TAG__ROUTES_RESPOND}/respond'         ,
+                           f'/{TAG__ROUTES_RESPOND}/generate-persona',
+                           f'/{TAG__ROUTES_RESPOND}/conversation'    ]
 
 # todo: fix this with the same patter
 class Routes__Respond(Fast_API__Routes):                                                                # Routes for persona-based response generation

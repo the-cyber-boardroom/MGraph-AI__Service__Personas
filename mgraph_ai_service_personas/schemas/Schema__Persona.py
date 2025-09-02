@@ -1,4 +1,4 @@
-from typing                                                             import Dict, List, Optional
+from typing                                                             import Dict, List
 from osbot_utils.type_safe.Type_Safe                                    import Type_Safe
 from osbot_utils.type_safe.primitives.safe_int.Timestamp_Now            import Timestamp_Now
 from osbot_utils.type_safe.primitives.safe_str.identifiers.Safe_Id      import Safe_Id
@@ -18,7 +18,7 @@ class Schema__Persona(Type_Safe):       # Complete persona definition for transl
 
     # Language and localization
     language             : Safe_Str__Language_Code
-    locale_context       : Optional[Safe_Str__Text]
+    locale_context       : Safe_Str__Text
 
     # Knowledge and expertise
     expertise            : Dict[Safe_Id, Enum__Expertise_Level]
@@ -27,15 +27,15 @@ class Schema__Persona(Type_Safe):       # Complete persona definition for transl
 
     # Communication preferences
     communication_style  : Schema__Communication_Style
-    urgency_preference   : Optional[Safe_Id]
+    urgency_preference   : Safe_Id
 
     # Metadata
-    version              : Optional[Safe_Str__Version]
+    version              : Safe_Str__Version        = None
     created_at           : Timestamp_Now
     updated_at           : Timestamp_Now
     tags                 : List[Safe_Id]
 
     # Additional context
-    background_context   : Optional[Safe_Str__Text]
+    background_context   : Safe_Str__Text
     common_terminology   : Dict[Safe_Id, Safe_Str__Text]
     avoid_terms          : List[Safe_Id]

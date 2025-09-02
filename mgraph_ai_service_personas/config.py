@@ -1,4 +1,4 @@
-from osbot_utils.type_safe.primitives.safe_str.filesystem.Safe_Str__File__Path import Safe_Str__File__Path
+
 
 # Service identification
 SERVICE_NAME              = 'mgraph_ai_service_personas'
@@ -9,8 +9,11 @@ FAST_API__DESCRIPTION     = "Persona-based translation and response generation s
 LOCALSTACK__ENDPOINT_URL  = 'http://localhost:4566'
 LOCALSTACK__REGION_NAME   = 'us-east-1'
 
+# Lambda configuration
+LAMBDA_DEPENDENCIES__FAST_API_SERVERLESS = ['osbot-fast-api-serverless==v1.17.0']
+
 # Cache configuration
-PERSONA_CACHE__DEFAULT__ROOT_FOLDER = Safe_Str__File__Path('persona-cache/')
+PERSONA_CACHE__DEFAULT__ROOT_FOLDER = 'persona-cache/'
 PERSONA_CACHE__BUCKET_NAME__PREFIX  = 'service-persona-cache'
 PERSONA_CACHE__BUCKET_NAME__SUFFIX  = 'data'
 PERSONA_CACHE__DEFAULT_TTL_HOURS    = 24
@@ -18,7 +21,7 @@ PERSONA_CACHE__DEFAULT_TTL_HOURS    = 24
 # Persona storage configuration
 PERSONA_STORAGE__BUCKET_NAME__PREFIX  = 'service-personas'
 PERSONA_STORAGE__BUCKET_NAME__SUFFIX  = 'storage'
-PERSONA_STORAGE__DEFAULT__ROOT_FOLDER = Safe_Str__File__Path('personas/')
+PERSONA_STORAGE__DEFAULT__ROOT_FOLDER = 'personas/'
 
 # LLM Service configuration
 LLM_SERVICE__DEFAULT_URL          = 'http://llms.prod.mgraph.ai'

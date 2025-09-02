@@ -1,3 +1,5 @@
+import re
+
 import pytest
 from unittest                                                             import TestCase
 from osbot_utils.type_safe.Type_Safe                                      import Type_Safe
@@ -22,23 +24,22 @@ class test_Schema__Persona(TestCase):
             assert type(_)                      is Schema__Persona
             assert base_classes(_)              == [Type_Safe, object]
 
-            # Field type initialization - collections are Type_Safe variants
-            assert type(_.id)                   is Safe_Id
+            assert type(_.id)                   is Safe_Id                  # Field type initialization - collections are Type_Safe variants
             assert type(_.name)                 is Safe_Str__Text
             assert type(_.role)                 is Safe_Id
             assert type(_.description)          is Safe_Str__Text
             assert type(_.language)             is Safe_Str__Language_Code
-            assert type(_.locale_context)       is type(None)
+            assert type(_.locale_context)       is Safe_Str__Text
             assert type(_.expertise)            is Type_Safe__Dict          # dict -> Type_Safe__Dict
             assert type(_.interests)            is Type_Safe__List          # list -> Type_Safe__List
             assert type(_.priorities)           is Type_Safe__List          # list -> Type_Safe__List
             assert type(_.communication_style)  is Schema__Communication_Style
-            assert type(_.urgency_preference)   is type(None)
+            assert type(_.urgency_preference)   is Safe_Id
             assert type(_.version)              is type(None)
             assert type(_.created_at)           is Timestamp_Now
             assert type(_.updated_at)           is Timestamp_Now
             assert type(_.tags)                 is Type_Safe__List          # list -> Type_Safe__List
-            assert type(_.background_context)   is type(None)
+            assert type(_.background_context)   is Safe_Str__Text
             assert type(_.common_terminology)   is Type_Safe__Dict          # dict -> Type_Safe__Dict
             assert type(_.avoid_terms)          is Type_Safe__List          # list -> Type_Safe__List
 
@@ -72,10 +73,10 @@ class test_Schema__Persona(TestCase):
 
             # Defaults for collections (Type_Safe variants)
             assert type(_.interests)   is Type_Safe__List
-            assert type(_.priorities)  is Type_Safe__Dict
+            assert type(_.priorities)  is Type_Safe__List
             assert type(_.tags)        is Type_Safe__List
             assert _.interests         == []
-            assert _.priorities        == {}
+            assert _.priorities        == []
             assert _.tags              == []
 
     def test_type_enforcement(self):                                        # Test runtime type checking
@@ -84,15 +85,26 @@ class test_Schema__Persona(TestCase):
             _.id   = Safe_Id("valid-id")
             _.name = Safe_Str__Text("Valid Name")
 
+
+            _.id = "raw-string!@£"
+            assert _.id == Safe_Id('raw-string___')                     # we can confirm with the type
+            assert _.id == 'raw-string___'                              # but due to the automapping, direct strings also work
+            _.name = 123
+            assert _.name == '123'
+            _.language = "en-US"
+            assert _.language == Safe_Str__Language_Code('en-US')
+            with pytest.raises(ValueError, match=re.escape("Invalid language code format: 'en-USAAAA'. Expected format like 'en', 'en-US', or 'pt-PT'")):
+                _.language = "en-USAAAA"
+
             # Invalid assignments should raise TypeError
-            with pytest.raises(TypeError):
-                _.id = "raw-string"                                         # Must be Safe_Id
+            # with pytest.raises(TypeError):
+            #     _.id = "raw-string"                                         # Must be Safe_Id
 
-            with pytest.raises(TypeError):
-                _.name = 123                                                # Must be Safe_Str__Text
+            # with pytest.raises(TypeError):
+            #     _.name = 123                                                # Must be Safe_Str__Text
 
-            with pytest.raises(TypeError):
-                _.language = "en-US"                                        # Must be Safe_Str__Language_Code
+            # with pytest.raises(TypeError):
+            #     _.language = "en-US"                                        # Must be Safe_Str__Language_Code
 
     def test_serialization_round_trip(self):                                # Test JSON serialization preserves types
         with Schema__Persona(id          = Safe_Id("test-123"),
@@ -112,12 +124,12 @@ class test_Schema__Persona(TestCase):
                 assert restored.obj() == original.obj()
 
                 # Spot-check key type preservation
-                assert type(restored.id)       is Safe_Id
-                assert type(restored.name)     is Safe_Str__Text
-                assert type(restored.language) is Safe_Str__Language_Code
-                assert type(restored.interests) is Type_Safe__List
-                assert type(restored.expertise) is Type_Safe__Dict
-                assert type(restored.priorities) is Type_Safe__Dict
+                assert type(restored.id        ) is Safe_Id
+                assert type(restored.name      ) is Safe_Str__Text
+                assert type(restored.language  ) is Safe_Str__Language_Code
+                assert type(restored.interests ) is Type_Safe__List
+                assert type(restored.expertise ) is Type_Safe__Dict
+                assert type(restored.priorities) is Type_Safe__List
 
     def test_communication_style_initialization(self):                      # Test nested Schema__Communication_Style initialization
         with Schema__Persona() as _:
@@ -145,3 +157,35 @@ class test_Schema__Persona(TestCase):
 
                 assert len(persona1.interests) == 1
                 assert len(persona1.expertise) == 1
+
+
+    def test__regression__in__Safe_Str__Language_Code(self):                                      # Test initialization with specific values
+        test_id        = "test-persona-1"
+        test_name      = "Test Persona"
+        test_role      = "ciso"
+        test_desc      = "Test CISO persona"
+        test_lang      = "pt-PT"
+        test_expertise = { "cybersecurity": Enum__Expertise_Level.EXPERT,
+                           "finance"      : Enum__Expertise_Level.BASIC }
+
+        with Schema__Persona(id          = test_id,
+                             name        = test_name,
+                             role        = test_role,
+                             description = test_desc,
+                             language    = test_lang,
+                             expertise   = test_expertise) as _:
+
+            # Direct value checks for non-collections
+            assert _.id          == test_id
+            assert _.name        == test_name
+            assert _.role        == test_role
+            assert _.description == test_desc
+            assert _.language    == 'pt-PT'                 # FIXED : BUG, should be "pt-PT"
+
+            assert _.obj().contains( __(id         = 'test-persona-1'                                ,
+                                       name        = 'Test Persona'                                  ,
+                                       role        = 'ciso'                                          ,
+                                       description ='Test CISO persona'                              ,
+                                       language    = 'pt-PT'                                         ,
+                                       expertise   = __(cybersecurity = Enum__Expertise_Level.EXPERT ,
+                                                        finance       = Enum__Expertise_Level.BASIC)))

@@ -1,15 +1,13 @@
 from typing                                                         import Dict, Any, Optional
-
 from osbot_fast_api.api.routes.Fast_API__Routes                     import Fast_API__Routes
-from osbot_utils.type_safe.primitives.safe_str.identifiers.Safe_Id import Safe_Id
-
-from mgraph_ai_service_personas.service.personas.Persona__Service  import Persona__Service
+from osbot_utils.type_safe.primitives.safe_str.identifiers.Safe_Id  import Safe_Id
+from mgraph_ai_service_personas.service.personas.Persona__Service   import Persona__Service
 
 
 TAG__ROUTES_TRANSLATE     = 'translate'
-ROUTES_PATHS__TRANSLATE   = [f'/{TAG__ROUTES_TRANSLATE}',
-                              f'/{TAG__ROUTES_TRANSLATE}/batch',
-                              f'/{TAG__ROUTES_TRANSLATE}/chain']
+ROUTES_PATHS__TRANSLATE   = [f'/{TAG__ROUTES_TRANSLATE}/translate',
+                             f'/{TAG__ROUTES_TRANSLATE}/batch'   ,
+                             f'/{TAG__ROUTES_TRANSLATE}/chain'   ]
 
 
 class Routes__Translate(Fast_API__Routes):                                                               # Routes for persona-based translation
@@ -19,7 +17,7 @@ class Routes__Translate(Fast_API__Routes):                                      
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.persona_service = Persona__Service().setup()
+        self.persona_service = Persona__Service()
 
     def translate(self, content     : str,
                         persona_id  : Optional[str]           = None,
@@ -94,5 +92,5 @@ class Routes__Translate(Fast_API__Routes):                                      
 
     def setup_routes(self):                                                                            # Setup all translation routes
         self.add_route_post(self.translate)
-        self.add_route_post(self.batch)
-        self.add_route_post(self.chain)
+        self.add_route_post(self.batch    )
+        self.add_route_post(self.chain    )
