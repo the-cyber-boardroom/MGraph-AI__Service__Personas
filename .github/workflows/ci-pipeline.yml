@@ -32,7 +32,7 @@ on:
         required: false
 
 env:
-  PACKAGE_NAME: 'mgraph_ai_service_persona'
+  PACKAGE_NAME: 'mgraph_ai_service_personas'
 
 jobs:
   run-tests:
